@@ -1,0 +1,18 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="StarcraftRandom.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="ReplayFolder" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\Users\Joka\Documents\StarCraft II\Accounts\129797237\2-S2-1-2770630\Replays\Multiplayer</Value>
+    </Setting>
+    <Setting Name="PlayerName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Tinker</Value>
+    </Setting>
+    <Setting Name="MinimumLength" Type="System.TimeSpan" Scope="User">
+      <Value Profile="(Default)">00:01:00</Value>
+    </Setting>
+    <Setting Name="FromDate" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)">2012-10-08</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
