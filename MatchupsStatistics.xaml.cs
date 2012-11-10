@@ -79,6 +79,12 @@ namespace StarcraftRandom
 				return;
 			}
 
+			if (File.GetCreationTime(replayFile) < Properties.Settings.Default.FromDate)
+			{
+				this.filteredReplays++;
+				return;
+			}
+
 			this.alreadyProcessed.Add(replayFile);
 
 			Replay replay = Replay.Parse(replayFile);

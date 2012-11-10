@@ -12,8 +12,8 @@
         </ContextMenu>
     </Window.ContextMenu>
     <Grid>
-        <Image HorizontalAlignment="Stretch" Name="zeImage" Stretch="Uniform" VerticalAlignment="Top" Width="350" Height="250" Source="/StarcraftRandom;component/Images/Random.jpg" Margin="0,0,0,0" Visibility="Hidden" />
-        <Label Content="Random" Height="39" HorizontalAlignment="Stretch" Name="label1" VerticalAlignment="Bottom" FontFamily="BankGothic Md BT" FontSize="32" Foreground="White" Width="350" HorizontalContentAlignment="Center" Margin="0,0,0,5" FontStretch="Normal" Opacity="0" Visibility="Hidden" />
+        <Image HorizontalAlignment="Stretch" Name="zeImage" Stretch="Uniform" VerticalAlignment="Top" Height="217" Source="/StarcraftRandom;component/Images/Random.jpg" Visibility="Hidden" />
+        <Label Content="Random" Height="39" HorizontalAlignment="Stretch" Name="label1" VerticalAlignment="Bottom" FontFamily="BankGothic Md BT" FontSize="22" Foreground="White" HorizontalContentAlignment="Center" Margin="0,0,0,5" FontStretch="Normal" Opacity="0" Visibility="Hidden" />
         <StarcraftRandom:MatchupsStatistics HorizontalAlignment="Stretch" Margin="0" x:Name="matchupsStatistics1" VerticalAlignment="Stretch" />
     </Grid>
 </Window>

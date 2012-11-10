@@ -48,26 +48,29 @@ namespace StarcraftRandom
 			matchupsStatistics1.Visibility = Visibility.Hidden;
 			label1.Visibility = Visibility.Visible;
 
-			var dice = new Random();
-			int roll = dice.Next(3);
-
-			ShowImage(roll);
-			//ShowRaceText(roll);
+			ShowImage();
+			ShowRaceText();
 
 			this.timer.Start();
 		}
 
-		private void ShowRaceText(int roll)
+		private void ShowRaceText()
 		{
-			label1.Content = icons[roll].Replace(".jpg", string.Empty);
+			var dice = new Random();
+			int roll = dice.Next(8);
+
+			label1.Content = conditions[roll];
 
 			var da2 = new DoubleAnimation
-				{From = 0, To = 1, AccelerationRatio = 0.9, Duration = new Duration(TimeSpan.FromMilliseconds(2000))};
+				{From = 0, To = 1, AccelerationRatio = 0.9, Duration = new Duration(TimeSpan.FromMilliseconds(1500))};
 			label1.BeginAnimation(OpacityProperty, da2);
 		}
 
-		private void ShowImage(int roll)
+		private void ShowImage()
 		{
+			var dice = new Random();
+			int roll = dice.Next(3);
+
 			zeImage.Visibility = Visibility.Visible;
 			zeImage.Source =
 				new BitmapImage(new Uri(@"/StarcraftRandom;component/Images/" + icons[roll], UriKind.RelativeOrAbsolute));
@@ -113,6 +116,18 @@ namespace StarcraftRandom
 				{ 0, "Zerg.jpg" },
 				{ 1, "Terran.jpg" },
 				{ 2, "Protoss.jpg" }
+			};
+
+		private readonly Dictionary<int, string> conditions = new Dictionary<int, string>
+			{
+				{ 0, "For 1 game" },
+				{ 1, "For 2 games" },
+				{ 2, "For 3 games" },
+				{ 3, "Until you lose a game" },
+				{ 4, "Until you win a game" },
+				{ 5, "Until you beat a terran" },
+				{ 6, "Until you beat a protoss" },
+				{ 7, "Until you beat a zerg" },
 			};
 	}
 }
