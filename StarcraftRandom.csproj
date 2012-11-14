@@ -62,6 +62,16 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ChallengeFactory.cs" />
+    <Compile Include="Constants.cs" />
+    <Compile Include="ProgressEventArgs.cs" />
+    <Compile Include="ReplayEventArgs.cs" />
+    <Compile Include="ReplayHandler.cs" />
+    <Compile Include="WinLoseCondition.cs" />
+    <Page Include="ChallengeDisplay.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -69,6 +79,10 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Challenge.cs" />
+    <Compile Include="ChallengeDisplay.xaml.cs">
+      <DependentUpon>ChallengeDisplay.xaml</DependentUpon>
     </Compile>
     <Compile Include="CustomCommands.cs" />
     <Compile Include="KeyboardHandler.cs" />
@@ -120,6 +134,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\Random.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Success.wav" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

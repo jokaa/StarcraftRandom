@@ -11,9 +11,8 @@
             <MenuItem Header="Quit" Command="{x:Static StarcraftRandom:CustomCommands.Exit}"/>
         </ContextMenu>
     </Window.ContextMenu>
-    <Grid>
-        <Image HorizontalAlignment="Stretch" Name="zeImage" Stretch="Uniform" VerticalAlignment="Top" Height="217" Source="/StarcraftRandom;component/Images/Random.jpg" Visibility="Hidden" />
-        <Label Content="Random" Height="39" HorizontalAlignment="Stretch" Name="label1" VerticalAlignment="Bottom" FontFamily="BankGothic Md BT" FontSize="22" Foreground="White" HorizontalContentAlignment="Center" Margin="0,0,0,5" FontStretch="Normal" Opacity="0" Visibility="Hidden" />
-        <StarcraftRandom:MatchupsStatistics HorizontalAlignment="Stretch" Margin="0" x:Name="matchupsStatistics1" VerticalAlignment="Stretch" />
+  <Grid>
+    <StarcraftRandom:ChallengeDisplay HorizontalAlignment="Stretch" Margin="0" x:Name="challengeDisplay" VerticalAlignment="Stretch" Visibility="Hidden" />
+    <StarcraftRandom:MatchupsStatistics HorizontalAlignment="Stretch" Margin="0" x:Name="matchupsStatistics" VerticalAlignment="Stretch" Visibility="Visible" />
     </Grid>
 </Window>

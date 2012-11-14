@@ -9,7 +9,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Threading;
 using Starcraft2.ReplayParser;
 
@@ -18,139 +17,79 @@ namespace StarcraftRandom
 	/// <summary>
 	/// Interaction logic for MatchupsStatistics.xaml
 	/// </summary>
-	public partial class MatchupsStatistics : UserControl
+	public partial class MatchupsStatistics
 	{
-		public Dictionary<string, Dictionary<string, Tuple<double, double>>> MathcupsStats { get; set; }
+    public Dictionary<string, Dictionary<string, Tuple<double, double>>> MathcupsStats
+    {
+      get;
+      set;
+    }
 
 		public MatchupsStatistics()
 		{
 			InitializeComponent();
-			this.alreadyProcessed = new List<string>();
+      this.MathcupsStats = new Dictionary<string, Dictionary<string, Tuple<double, double>>>();
+      this.totalReplays = 0;
+      this.filteredReplays = 0;
 		}
 
-		public void UpdateMatchups()
-		{
-			this.MathcupsStats = new Dictionary<string, Dictionary<string, Tuple<double, double>>>();
+    public void OnNewReplay(object sender, ReplayEventArgs args)
+    {
+      string playerName = Properties.Settings.Default.PlayerName;
 
-			UpdateDelegate del = UpdateMatchupsConcrete;
-			progressBar1.Visibility = Visibility.Visible;
+      Player me = args.Replay.Players.FirstOrDefault(p => p != null && p.Name == playerName);
+      Player opponent = args.Replay.Players.FirstOrDefault(p => p != null && p.Name != playerName);
 
-			del.BeginInvoke(iar => progressBar1.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(Refresh)), null);
+      if (me != null && opponent != null)
+      {
+        if (!this.MathcupsStats.ContainsKey(me.Race))
+        {
+          this.MathcupsStats[me.Race] = new Dictionary<string, Tuple<double, double>>();
+        }
+
+        if (!this.MathcupsStats[me.Race].ContainsKey(opponent.Race))
+        {
+          this.MathcupsStats[me.Race][opponent.Race] = Tuple.Create(0.0, 0.0);
+        }
+
+        double wins = this.MathcupsStats[me.Race][opponent.Race].Item1 + (me.IsWinner ? 1 : 0);
+        double total = this.MathcupsStats[me.Race][opponent.Race].Item2 + 1;
+
+        this.MathcupsStats[me.Race][opponent.Race] = Tuple.Create(wins, total);
+      }
 		}
 
-		public void NewReplay(string path)
-		{
-			if (this.MathcupsStats == null)
-			{
-				UpdateMatchups();
-			}
-
-			ProgressReplayFile(path, Properties.Settings.Default.PlayerName);
-			progressBar1.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(Refresh));
-		}
-
-		private void UpdateMatchupsConcrete()
-		{
-			string folder = Properties.Settings.Default.ReplayFolder;
-			string playerName = Properties.Settings.Default.PlayerName;
-
-			var replayFiles = Directory.GetFiles(folder, "*.SC2Replay", SearchOption.AllDirectories);
-
-			double totalFiles = replayFiles.Length;
-			double progressed = 0;
-
-			foreach (string replayFile in replayFiles)
-			{
-				ProgressReplayFile(replayFile, playerName);
-				progressed++;
-				progressBar1.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action<double>(UpdateProgressBar), 100 * progressed / totalFiles);
-			}
-		}
+    public void OnProgressUpdate(object sender, ProgressEventArgs args)
+    {
+      this.filteredReplays = args.Filtered;
+      this.totalReplays = args.Total - args.Filtered;
+      this.progressBar1.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action<double>(this.UpdateProgressBar), args.Progress);
+      this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(this.Refresh));
+    }
 
 		private void UpdateProgressBar(double value)
 		{
-			progressBar1.Value = value;
+		  this.progressBar1.Visibility = value < 100 ? Visibility.Visible : Visibility.Hidden;
+      this.progressBar1.Value = value;
 		}
 
-		private void ProgressReplayFile(string replayFile, string playerName)
+	  private void Refresh()
 		{
-			if (this.alreadyProcessed.Contains(replayFile))
-			{
-				return;
-			}
+      tvtLabel.Content = CalcWinrate(Constants.Terran, Constants.Terran).ToString(CultureInfo.InvariantCulture) + "%";
+      tvzLabel.Content = CalcWinrate(Constants.Terran, Constants.Zerg).ToString(CultureInfo.InvariantCulture) + "%";
+      tvpLabel.Content = CalcWinrate(Constants.Terran, Constants.Protoss).ToString(CultureInfo.InvariantCulture) + "%";
+      zvtLabel.Content = CalcWinrate(Constants.Zerg, Constants.Terran).ToString(CultureInfo.InvariantCulture) + "%";
+      zvzLabel.Content = CalcWinrate(Constants.Zerg, Constants.Zerg).ToString(CultureInfo.InvariantCulture) + "%";
+      zvpLabel.Content = CalcWinrate(Constants.Zerg, Constants.Protoss).ToString(CultureInfo.InvariantCulture) + "%";
+      pvtLabel.Content = CalcWinrate(Constants.Protoss, Constants.Terran).ToString(CultureInfo.InvariantCulture) + "%";
+      pvzLabel.Content = CalcWinrate(Constants.Protoss, Constants.Zerg).ToString(CultureInfo.InvariantCulture) + "%";
+      pvpLabel.Content = CalcWinrate(Constants.Protoss, Constants.Protoss).ToString(CultureInfo.InvariantCulture) + "%";
 
-			if (File.GetCreationTime(replayFile) < Properties.Settings.Default.FromDate)
-			{
-				this.filteredReplays++;
-				return;
-			}
-
-			this.alreadyProcessed.Add(replayFile);
-
-			Replay replay = Replay.Parse(replayFile);
-
-			if (!Filter(replay))
-			{
-				Player me = replay.Players.FirstOrDefault(p => p != null && p.Name == playerName);
-				Player opponent = replay.Players.FirstOrDefault(p => p != null && p.Name != playerName);
-
-				if (me != null && opponent != null)
-				{
-					if (!this.MathcupsStats.ContainsKey(me.Race))
-					{
-						this.MathcupsStats[me.Race] = new Dictionary<string, Tuple<double, double>>();
-					}
-
-					if (!this.MathcupsStats[me.Race].ContainsKey(opponent.Race))
-					{
-						this.MathcupsStats[me.Race][opponent.Race] = Tuple.Create(0.0, 0.0);
-					}
-
-					double wins = this.MathcupsStats[me.Race][opponent.Race].Item1 + (me.IsWinner ? 1 : 0);
-					double total = this.MathcupsStats[me.Race][opponent.Race].Item2 + 1;
-
-					this.MathcupsStats[me.Race][opponent.Race] = Tuple.Create(wins, total);
-				}
-			}
-			else
-			{
-				this.filteredReplays++;
-			}
-
-			this.totalReplays++;
-		}
-
-		private static bool Filter(Replay replay)
-		{
-			bool ok = 
-				replay.TeamSize == "1v1" &&
-				replay.GameType == GameType.Open &&
-				(replay.GameLength >= Properties.Settings.Default.MinimumLength || replay.GameLength == TimeSpan.Zero) &&
-				replay.Timestamp >= Properties.Settings.Default.FromDate &&
-				replay.Players.Any(p => p != null && p.Name == Properties.Settings.Default.PlayerName);
-
-			return !ok;
-		}
-
-		private void Refresh()
-		{
-			progressBar1.Visibility = Visibility.Hidden;
-
-			tvtLabel.Content = CalcWinrate(Terran, Terran).ToString(CultureInfo.InvariantCulture) + "%";
-			tvzLabel.Content = CalcWinrate(Terran, Zerg).ToString(CultureInfo.InvariantCulture) + "%";
-			tvpLabel.Content = CalcWinrate(Terran, Protoss).ToString(CultureInfo.InvariantCulture) + "%";
-			zvtLabel.Content = CalcWinrate(Zerg, Terran).ToString(CultureInfo.InvariantCulture) + "%";
-			zvzLabel.Content = CalcWinrate(Zerg, Zerg).ToString(CultureInfo.InvariantCulture) + "%";
-			zvpLabel.Content = CalcWinrate(Zerg, Protoss).ToString(CultureInfo.InvariantCulture) + "%";
-			pvtLabel.Content = CalcWinrate(Protoss, Terran).ToString(CultureInfo.InvariantCulture) + "%";
-			pvzLabel.Content = CalcWinrate(Protoss, Zerg).ToString(CultureInfo.InvariantCulture) + "%";
-			pvpLabel.Content = CalcWinrate(Protoss, Protoss).ToString(CultureInfo.InvariantCulture) + "%";
-
-			tTotalLabel.Content = CalcTotalWinrate(Terran).ToString(CultureInfo.InvariantCulture) + "%";
-			zTotalLabel.Content = CalcTotalWinrate(Zerg).ToString(CultureInfo.InvariantCulture) + "%";
-			pTotalLabel.Content = CalcTotalWinrate(Protoss).ToString(CultureInfo.InvariantCulture) + "%";
+      tTotalLabel.Content = CalcTotalWinrate(Constants.Terran).ToString(CultureInfo.InvariantCulture) + "%";
+      zTotalLabel.Content = CalcTotalWinrate(Constants.Zerg).ToString(CultureInfo.InvariantCulture) + "%";
+      pTotalLabel.Content = CalcTotalWinrate(Constants.Protoss).ToString(CultureInfo.InvariantCulture) + "%";
 			
-			filteredLabel.Content = "Total: " + this.totalReplays + "  Filtered: " + this.filteredReplays;
+			filteredLabel.Content = "Parsed: " + this.totalReplays + "  Filtered: " + this.filteredReplays;
 		}
 
 		private double CalcWinrate(string race, string opponentRace)
@@ -176,17 +115,17 @@ namespace StarcraftRandom
 
 			if (MathcupsStats.ContainsKey(race))
 			{
-				if (MathcupsStats[race].ContainsKey(Terran))
+        if (MathcupsStats[race].ContainsKey(Constants.Terran))
 				{
-					wins += MathcupsStats[race][Terran].Item1;
+          wins += MathcupsStats[race][Constants.Terran].Item1;
 				}
-				if (MathcupsStats[race].ContainsKey(Zerg))
+        if (MathcupsStats[race].ContainsKey(Constants.Zerg))
 				{
-					wins += MathcupsStats[race][Zerg].Item1;
+          wins += MathcupsStats[race][Constants.Zerg].Item1;
 				}
-				if (MathcupsStats[race].ContainsKey(Protoss))
+        if (MathcupsStats[race].ContainsKey(Constants.Protoss))
 				{
-					wins += MathcupsStats[race][Protoss].Item1;
+          wins += MathcupsStats[race][Constants.Protoss].Item1;
 				}
 			}
 
@@ -199,30 +138,24 @@ namespace StarcraftRandom
 
 			if (MathcupsStats.ContainsKey(race))
 			{
-				if (MathcupsStats[race].ContainsKey(Terran))
+        if (MathcupsStats[race].ContainsKey(Constants.Terran))
 				{
-					total += MathcupsStats[race][Terran].Item2;
+          total += MathcupsStats[race][Constants.Terran].Item2;
 				}
-				if (MathcupsStats[race].ContainsKey(Zerg))
+        if (MathcupsStats[race].ContainsKey(Constants.Zerg))
 				{
-					total += MathcupsStats[race][Zerg].Item2;
+          total += MathcupsStats[race][Constants.Zerg].Item2;
 				}
-				if (MathcupsStats[race].ContainsKey(Protoss))
+        if (MathcupsStats[race].ContainsKey(Constants.Protoss))
 				{
-					total += MathcupsStats[race][Protoss].Item2;
+          total += MathcupsStats[race][Constants.Protoss].Item2;
 				}
 			}
 
 			return total;
 		}
 
-		private delegate void UpdateDelegate();
-
-		private const string Zerg = "Zerg";
-		private const string Protoss = "Protoss";
-		private const string Terran = "Terran";
-		private readonly List<string> alreadyProcessed = new List<string>();
-		private int filteredReplays = 0;
-		private int totalReplays = 0;
+    private int totalReplays;
+    private int filteredReplays;
 	}
 }

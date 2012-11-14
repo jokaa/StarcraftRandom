@@ -46,7 +46,7 @@
             <Label Foreground="White" Height="28" HorizontalAlignment="Left" VerticalAlignment="Bottom" Grid.Column="2" Grid.Row="4" Name="pvzLabel" Content="0%" FontSize="14" />
             <Label Foreground="White" Height="28" HorizontalAlignment="Left" VerticalAlignment="Bottom" Grid.Column="3" Grid.Row="4" Name="pvpLabel" Content="0%" FontSize="14" />
             <Label Foreground="White" Height="28" HorizontalAlignment="Left" VerticalAlignment="Bottom" Grid.Column="4" Grid.Row="4" Name="pTotalLabel" Content="0%" FontWeight="Bold" FontSize="14" />
-            <ProgressBar Grid.ColumnSpan="5" Grid.Row="5" HorizontalAlignment="Stretch" Margin="10,6,10,6" Name="progressBar1" VerticalAlignment="Center" Height="20" Visibility="Hidden" />
+            <ProgressBar Grid.ColumnSpan="2" Grid.Row="5" HorizontalAlignment="Stretch" Margin="10,6,0,6" Name="progressBar1" VerticalAlignment="Center" Height="20" />
         </Grid>
     </Grid>
 </UserControl>
